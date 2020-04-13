@@ -1,13 +1,19 @@
 import cv2
 import numpy as np
 import csv
+import os, subprocess
+
+############### Parameters to be tweaked ###############
+inputDir = "ImageData"
+topN = 1
 
 # Running surf detector
 surf = cv2.xfeatures2d.SURF_create(1000)
 with open('information.csv', 'w', newline = '') as f:
     writer = csv.writer(f)
-    for k in range(1,99):
-        img_path = r'Images/t{}.jpg'.format(k)
+    for file in os.listdir(inputDir):
+        print("{} is loaded.".format(file))
+        img_path = inputDir + '/' + file
         img1 = cv2.imread(img_path,1)
         scale_percent = 60
         width = int(img1.shape[1] * scale_percent / 100)
@@ -18,8 +24,8 @@ with open('information.csv', 'w', newline = '') as f:
         key_points, descriptors = surf.detectAndCompute(img,None)
         dim = descriptors.shape
         edge = []
-        # Labelling of corner points
-        for i in range(100):   
+        # Labelling of corner or edge points
+        for i in range(topN):   
             out_img = np.copy(img)
             print(i)
             key_points_f = []
