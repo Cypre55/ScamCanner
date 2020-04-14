@@ -5,7 +5,7 @@ import os, subprocess
 
 ############### Parameters to be tweaked ###############
 inputDir = "ImageData"
-topN = 1
+topN = 100
 
 # Running surf detector
 surf = cv2.xfeatures2d.SURF_create(1000)
@@ -16,11 +16,17 @@ with open('information.csv', 'w', newline = '') as f:
             print("{} is loaded.".format(file))
             img_path = inputDir + '/' + file
             img1 = cv2.imread(img_path,1)
-            scale_percent = 60
+
+            img1 = cv2.medianBlur(img1,29)
+            kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+            img1 = cv2.filter2D(img1, -1, kernel)
+            img1 = cv2.filter2D(img1, -1, kernel)
+            scale_percent = 20
             width = int(img1.shape[1] * scale_percent / 100)
             height = int(img1.shape[0] * scale_percent / 100)
             dim = (width, height)
             img1 = cv2.resize(img1, dim, interpolation = cv2.INTER_AREA)
+
             img = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
             key_points, descriptors = surf.detectAndCompute(img,None)
             dim = descriptors.shape
