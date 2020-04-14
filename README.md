@@ -2,4 +2,12 @@
 
 ## Instructions for use
 
-The project currently contains 2 directories "Surf_test" and "Testing_annotation using surf". The first one contains a python program to read images from a directory name "ImageData" inside it(Make yourself) so it will generate a csv file based on the inputs taken from the user for each image in the directory. The second one works similarly but is for classififing corners only.
+The project currently incomplete and the instructions will be available once it is ready.
+
+## Using the SURF detector and classifying feature
+
+Currently the work is to classify whether a feature is a corner or not. The SurfCorner.py is a python3 program that reads images from "ImageData" directory and does some filtering and then uses SURF detector to get Keypoints. We take top 30 keypoints if there exist and display it one by one on the image and you have to type 1 or 0 depending on whether it is a true corner(approximately). It will save it in a csv file after each image is complete.
+
+After loading images please be patient as it takes few milliseconds to apply the filters and perfrom SURF.
+
+*Note: The images have to be .jpg for it to be able to detect in the directory.
