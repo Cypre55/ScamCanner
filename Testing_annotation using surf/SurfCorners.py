@@ -6,7 +6,6 @@ import os, subprocess
 topN  = 100
 inputDir = "ImageData"
 
-writer = csv.writer(c)
 with open('scans.csv', 'w') as c:
 	writer = csv.writer(c)
 	for file in os.listdir(inputDir):
