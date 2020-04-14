@@ -40,7 +40,7 @@ with open('information.csv', 'w', newline = '') as f:
                     edge.append(i)
             # Writing data in csv file
             f_data = []
-            for i in range(len(key_points)):
+            for i in range(topN):
                 temp = []
                 if i in edge:
                     temp.append(1)
