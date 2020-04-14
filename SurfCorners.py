@@ -3,7 +3,7 @@ import cv2
 import csv
 import os, subprocess
 #############  Parameters for tweeking  ################
-topN  = 100
+topN  = 30
 inputDir = "ARK scamcanner data"
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -51,11 +51,11 @@ def applyFilter(image, sensitivity = 30):
 	# filtered = cv2.cvtColor(filtered, cv2.COLOR_GRAY2BGR)
 
 	img = cv2.GaussianBlur(image, (15, 15), 10 )
-	filtered = cv2.pyrMeanShiftFiltering(img, 20, 45, 3)
+	filtered = cv2.pyrMeanShiftFiltering(img, 70, 50, 5)
 
 	return filtered
 
-with open('scans.csv', 'w') as c:
+with open('Data4Training.csv', 'w') as c:
 	writer = csv.writer(c)
 	for file in os.listdir(inputDir):
 		if file.endswith(".jpg"):
@@ -80,6 +80,7 @@ with open('scans.csv', 'w') as c:
 				kps = kps[:topN]
 			corners=[]
 
+			"""
 			ikps = np.empty((image.shape[0], image.shape[1], 3), dtype = np.uint8)
 			cv2.drawKeypoints(image, kps, ikps, (178, 0, 255))
 			cv2.imshow('SURF', ikps)
@@ -95,7 +96,8 @@ with open('scans.csv', 'w') as c:
 				ikps = np.empty((image.shape[0], image.shape[1], 3), dtype = np.uint8)	
 				cv2.drawKeypoints(image, points, ikps, (178, 0, 255))
 				cv2.imshow('SURF', ikps)
-				enter=int(input("Corner (0 or 1) :"))
+				cv2.waitKey(1)
+				enter=int(input("{}) Corner (0 or 1) :".format(i+1)))
 				if(enter==1):
 					corners.append(i)
 			data=[]
@@ -111,4 +113,4 @@ with open('scans.csv', 'w') as c:
 					temp.append(temp2[j])
 				data.append(temp)
 			writer.writerows(data)
-			"""
+			
