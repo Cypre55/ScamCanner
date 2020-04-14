@@ -15,6 +15,11 @@ with open('scans.csv', 'w') as c:
 		
 			image = cv2.imread(sourceFile,0)
 			image=cv2.resize(image,None,fx=0.2,fy=0.2,interpolation=cv2.INTER_AREA)
+			image = cv2.medianBlur(image,101)
+            image = cv2.blur(image, (11, 11))
+            kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+            image = cv2.filter2D(image, -1, kernel)
+            image = cv2.filter2D(image, -1, kernel)
 			# cv2.waitKey(0)
 			featureDetector = cv2.xfeatures2d.SURF_create()
 			(kps, descs) = featureDetector.detectAndCompute(image, None)
@@ -27,7 +32,6 @@ with open('scans.csv', 'w') as c:
 					
 				points =[]
 				points.append(kps[i])
-				
 				ikps = np.empty((image.shape[0], image.shape[1], 3), dtype = np.uint8)	
 				cv2.drawKeypoints(image, points, ikps, (178, 0, 255))
 				cv2.imshow('SURF', ikps)
