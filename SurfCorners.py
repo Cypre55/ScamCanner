@@ -50,8 +50,10 @@ def applyFilter(image, sensitivity = 30):
 	# filtered = cv2.inRange(img, lower_white, upper_white)
 	# filtered = cv2.cvtColor(filtered, cv2.COLOR_GRAY2BGR)
 
-	img = cv2.GaussianBlur(image, (15, 15), 10 )
-	filtered = cv2.pyrMeanShiftFiltering(img, 70, 50, 5)
+	# img = cv2.GaussianBlur(image, (15, 15), 10 )
+	# filtered = cv2.pyrMeanShiftFiltering(img, 70, 50, 5)
+	
+	filtered = image
 
 	return filtered
 
