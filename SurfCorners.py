@@ -3,8 +3,8 @@ import cv2
 import csv
 import os, subprocess
 #############  Parameters for tweeking  ################
-topN  = 30
-inputDir = "ARK scamcanner data"
+topN  = 100
+inputDir = "ImageData"
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
@@ -65,7 +65,7 @@ with open('Data4Training.csv', 'w') as c:
 			sourceFile = inputDir + '/' + file
 		
 			image = cv2.imread(sourceFile)
-			if(image.shape[1] > image.shape[0]):
+			if(image.shape[0] > image.shape[1]):
 				image = image_resize(image, height=720)
 			else:
 				image = image_resize(image, width=720)
@@ -115,4 +115,3 @@ with open('Data4Training.csv', 'w') as c:
 					temp.append(temp2[j])
 				data.append(temp)
 			writer.writerows(data)
-			
