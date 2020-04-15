@@ -4,13 +4,15 @@
 
 The project currently incomplete and the instructions will be available once it is ready.
 
-## Using the SURF detector and classifying feature
+## Using the SurfCorner.py detector and classifying feature
+
+*USE clickSURF.py for faster and better marking.*
 
 Currently the work is to classify whether a feature is a corner or not. The SurfCorner.py is a python3 program that reads images from "ImageData" directory and does some filtering and then uses SURF detector to get Keypoints. We take top 30 keypoints if there exist and display it one by one on the image and you have to type 1 or 0 depending on whether it is a true corner(approximately). It will save it in a csv file after each image is complete.
 
 After loading images please be patient as it takes few milliseconds to apply the filters and perfrom SURF. If you want to see the overall features for all images uncomment the big part of code and comment the rest till the end....
 
-*Note: The images have to be .jpg for it to be able to detect in the directory.
+*Note: The images have to be .jpg for it to be able to detect in the directory.*
 
 ## Testing the trained corner detector
 
@@ -18,4 +20,10 @@ Put the data.csv logreg.py and test.py in a single directory. Rename your image 
 
 ## Using clickSURF
 
-Put test images in a directory ImageData. Run script. For selecting corner area-press left click at one diagonal end drag cursor to next diagonal end and release. Mark as many rectangles as needed. Press 'r' if you want to redo for the current page. Press if you want to confirm the selected portions.
+Put test images in a directory "ImageData". Run script. For selecting corner area-press left click at one diagonal end drag cursor to next diagonal end and release. Mark as many rectangles as needed. Press 'r' if you want to redo for the current page. Press 'c' if you want to confirm the selected portions and the final output will shown which ones are marked 1 and the result will be stored in "Data4Training.csv". 
+
+*Note: The images in the folder "ImageData" WILL BE DELETED after its data has been added. It is advisable to COPY the images to the directory. This feature is added so if you encounter an error you can continue from where you left off. If you would like to remove this, then remove the last line of "clickSURF.py".
+```python
+		os.remove(img_path)
+```
+*
