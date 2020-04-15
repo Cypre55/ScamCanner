@@ -11,3 +11,7 @@ Currently the work is to classify whether a feature is a corner or not. The Surf
 After loading images please be patient as it takes few milliseconds to apply the filters and perfrom SURF. If you want to see the overall features for all images uncomment the big part of code and comment the rest till the end....
 
 *Note: The images have to be .jpg for it to be able to detect in the directory.
+
+## Testing the trained corner detector
+
+Put the data.csv logreg.py and test.py in a single directory. Rename your image file as 'test.jpg'. Run test.py.
