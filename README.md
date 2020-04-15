@@ -15,3 +15,7 @@ After loading images please be patient as it takes few milliseconds to apply the
 ## Testing the trained corner detector
 
 Put the data.csv logreg.py and test.py in a single directory. Rename your image file as 'test.jpg'. Run test.py.
+
+## Using clickSURF
+
+Put test images in a directory ImageData. Run script. For selecting corner area-press left click at one diagonal end drag cursor to next diagonal end and release. Mark as many rectangles as needed. Press 'r' if you want to redo for the current page. Press if you want to confirm the selected portions.
