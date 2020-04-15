@@ -3,7 +3,7 @@ import cv2
 import csv
 import os, subprocess
 #############  Parameters for tweeking  ################
-topN  = 30
+topN  = 100
 inputDir = "ARK scamcanner data"
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
