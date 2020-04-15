@@ -5,6 +5,8 @@ import csv
 
 refPt = []
 cropping = False
+topN = 100
+inputDir="ImageData"
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     dim = None
@@ -31,17 +33,15 @@ def click_and_crop(event, x, y, flags, param):
 		cv2.rectangle(ikps, refPt[-2], refPt[-1], (0, 255, 0), 2)
 		cv2.imshow("image", ikps)
 
-inputDir="ImageData"
-
 surf = cv2.xfeatures2d.SURF_create(75)
-with open('information.csv','w',newline='') as f:
+with open('Data4Training.csv', 'w') as f:
 	writer=csv.writer(f)
 	for file in os.listdir(inputDir):
 		if file[-4:]!='.jpg':
 			continue
 		print("{} is loaded.".format(file))
 		refPt=[]
-		img_path = './'+inputDir + '/' + file
+		img_path = './' + inputDir + '/' + file
 		image=cv2.imread(img_path)
 		if(image.shape[0] > image.shape[1]):
 			image = image_resize(image, height=720)
@@ -60,6 +60,7 @@ with open('information.csv','w',newline='') as f:
 			key = cv2.waitKey(1) & 0xFF
 			if key == ord("r"):
 				ikps= clone.copy()
+				refPt = []
 			elif key == ord("c"):
 				break
 		
@@ -80,14 +81,19 @@ with open('information.csv','w',newline='') as f:
 					break
 			if b:
 				temp.append(1)
+				temp.append(kps[j])
+				for k in range(64):
+					temp.append(descs[j][k])
+				data.append(temp)
 				cv2.drawKeypoints(img,[kps[j]],img,color=(0,102,255))
-			else:
+			elif(j < topN):
 				temp.append(0)
-			temp.append(kps[j])
-			for k in range(64):
-				temp.append(descs[j][k])
-			data.append(temp)
-		cv2.imshow('edges',img)
+				temp.append(kps[j])
+				for k in range(64):
+					temp.append(descs[j][k])
+				data.append(temp)
+		cv2.imshow('corners',img)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
 		writer.writerows(data)
+		os.remove(img_path)
