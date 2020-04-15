@@ -22,8 +22,8 @@ Put the data.csv logreg.py and test.py in a single directory. Rename your image 
 
 Put test images in a directory "ImageData". Run script. For selecting corner area-press left click at one diagonal end drag cursor to next diagonal end and release. Mark as many rectangles as needed. Press 'r' if you want to redo for the current page. Press 'c' if you want to confirm the selected portions and the final output will shown which ones are marked 1 and the result will be stored in "Data4Training.csv". 
 
-*Note: The images in the folder "ImageData" WILL BE DELETED after its data has been added. It is advisable to COPY the images to the directory. This feature is added so if you encounter an error you can continue from where you left off. If you would like to remove this, then remove the last line of "clickSURF.py".
+The images in the folder "ImageData" **WILL BE DELETED** after its data has been added. It is advisable to **COPY** the images to the directory. This feature is added so if you encounter an error you can continue from where you left off. If you would like to remove this, then remove the last line of "clickSURF.py".
 ```python
 		os.remove(img_path)
 ```
-*
+
