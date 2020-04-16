@@ -41,10 +41,10 @@ with open('information.csv', 'w', newline='') as f:
                     if sharp[y+j,x+k]>=245:
                         flag = 1
 
-            if flag == 1:
-                cv2.circle(image, (x,y), 5, (0,255,0),-1)
-            else:
-                cv2.circle(image, (x,y), 5, (255,0,0),-1)
+#             if flag == 1:
+#                 cv2.circle(image, (x,y), 5, (0,255,0),-1)
+#             else:
+#                 cv2.circle(image, (x,y), 5, (255,0,0),-1)
 
             ikps = np.empty((image.shape[0], image.shape[1], 3), dtype=np.uint8)
             # cv2.drawKeypoints(image, [kps[i]], ikps, color=(25, 255, 64))
