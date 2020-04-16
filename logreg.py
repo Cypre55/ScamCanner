@@ -4,15 +4,11 @@ import matplotlib.pyplot as plt
 import math
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
 from sklearn.preprocessing import PolynomialFeatures
 import pickle
 import joblib
-import csv # TODO: Remove
-from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.model_selection import GridSearchCV
-
 
 class logr:
 	# Will search for the trainned model, if not found will generate it.
