@@ -7,7 +7,7 @@ from sklearn import svm
 from scipy.stats import boxcox
 import imblearn
 
-l = range(2,64)
+l = range(2,66)
 y_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = [0])
 x_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = l)
 y_df = np.array(y_df[0])
