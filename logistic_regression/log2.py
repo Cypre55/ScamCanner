@@ -6,14 +6,18 @@ from sklearn.model_selection import train_test_split
 from sklearn import svm
 from scipy.stats import boxcox
 import imblearn
+from sklearn import preprocessing, metrics
+import matplotlib.pyplot as plt
+import seaborn as sns
 import os, subprocess
 
 l = range(2,66)
 y_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = [0])
 x_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = l)
+x_normalized = preprocessing.normalize(x_df, norm='l2')
 y_df = np.array(y_df[0])
-S1 = svm.SVC(C =5000.0, class_weight = {1:1.63, 0:1.0})
-S1.fit(x_df, y_df)
+log_reg = LogisticRegression(solver = 'saga', max_iter = 500, C = 100.0)
+log_reg.fit(x_df, y_df)
 
 inputDir = "ImageData"
 
@@ -40,7 +44,7 @@ for file in os.listdir(inputDir):
         key_points_ne = []
         descriptors = pd.DataFrame(descriptors)
 
-        a = S1.predict(descriptors)
+        a = log_reg.predict(descriptors)
         for i in range(len(a)):
             if a[i]==1:
                 key_points_e.append(key_points[i])
