@@ -49,13 +49,13 @@ else:
 #image = cv2.filter2D(image, -1, kernel)
 gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 kernel = np.ones((7,7), np.float32)
-		gray=cv2.morphologyEx(gray,cv2.MORPH_CLOSE,kernel)
-		kernel_sharpening = np.array([[-1,-1,-1], 
-	                              [-1, 9,-1],
-	                              [-1,-1,-1]])
-		sharp = cv2.filter2D(gray, -1, kernel_sharpening)
-		clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-		cl1 = clahe.apply(sharp)
+gray=cv2.morphologyEx(gray,cv2.MORPH_CLOSE,kernel)
+kernel_sharpening = np.array([[-1,-1,-1], 
+	                      [-1, 9,-1],
+	                      [-1,-1,-1]])
+sharp = cv2.filter2D(gray, -1, kernel_sharpening)
+clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+cl1 = clahe.apply(sharp)
 kps, descs = surf.detectAndCompute(cl1, None)
 edges=[]
 nedges=[]
