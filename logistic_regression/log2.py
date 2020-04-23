@@ -32,6 +32,7 @@ for file in os.listdir(inputDir):
         print("{} is loaded.".format(file))
         img_path = inputDir + '/' + file
         img1 = cv2.imread(img_path,1)
+        org_img = img1.copy()
         img1 = cv2.medianBlur(img1,29)
         kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         img1 = cv2.filter2D(img1, -1, kernel)
@@ -42,6 +43,10 @@ for file in os.listdir(inputDir):
         height = int(img1.shape[0] * scale_percent / 100)
         dim = (width, height)
         img1 = cv2.resize(img1, dim, interpolation = cv2.INTER_AREA)
+        width = int(org_img.shape[1] * scale_percent / 100)
+        height = int(org_img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        org_img = cv2.resize(org_img, dim, interpolation = cv2.INTER_AREA)
         img = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
         key_points, descriptors = surf.detectAndCompute(img,None)
         dim = descriptors.shape
@@ -90,8 +95,10 @@ for file in os.listdir(inputDir):
         width = rect[1][0]
         height = rect[1][1]
         temp = (min(width, height))/2
+        k = 0
         # print(box)
         for i in range(len(box)):
+            k += 5
             t1 = 0
             t2 = 0
             count = 0
@@ -100,19 +107,30 @@ for file in os.listdir(inputDir):
                 point2 = [p[0],p[1]]
                 dis = (((box[i][0] - point2[0])**2 + (box[i][1] - point2[1])**2)**0.5)
                 if dis < temp:
-                    t1 += point2[0] * weight(dis, 10000)
-                    t2 += point2[1] * weight(dis, 10000)
-                    count += weight(dis, 10000)
+                    t1 += point2[0] * weight(dis, 5000)
+                    t2 += point2[1] * weight(dis, 5000)
+                    count += weight(dis, 5000)
             if count==0:
+                i-=1
+                temp += 5*k
                 continue
             box[i][0] = t1/count
             box[i][1] = t2/count
+            temp = min(width,height)/2
+        # pts_src = box
+        # dim = img.shape
+        # print(dim)
+        # pts_dst = np.asarray([[0,0], [0,dim[1]], [dim[0],0], [dim[0].dim[1]]])
+        # pts_dst
+        # h, status = cv2.findHomography(pts_src, pts_dst)
+        # h_image = cv2.warpPerspective(img1, h, (img1.shape[1],img1.shape[0]))
         # print(box)
-        out_img = np.copy(img1)
-        cv2.drawKeypoints(img1, key_points_e, out_img, (0,0,255), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
-        cv2.drawKeypoints(img1, key_points_ne, out_img, (255,0,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
+        out_img = np.copy(org_img)
+        cv2.drawKeypoints(org_img, key_points_e, out_img, (0,0,255), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
+        cv2.drawKeypoints(org_img, key_points_ne, out_img, (255,0,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
         cv2.drawContours(out_img, hull, 0, (255,255,0), 1)
         cv2.drawContours(out_img, [box], 0, (0,0,255),8)
         cv2.imshow("window", out_img)
+        # cv2.imshow("Homography", h_image)
         cv2.waitKey(10000)
             
