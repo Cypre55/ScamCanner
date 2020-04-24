@@ -5,7 +5,7 @@ from skimage.filters import threshold_local
 def make_document(org_img, hull, ratio = 1):
     warped = four_point_transform(org_img, hull[0].reshape(4, 2) * ratio)
     warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
-    T = threshold_local(warped, 11, offset = 10, method = "gaussian")
+    T = threshold_local(warped, 11, offset = 5, method = "gaussian")
     warped = (warped > T).astype("uint8") * 255
 
     return warped

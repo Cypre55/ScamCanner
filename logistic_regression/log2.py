@@ -11,18 +11,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os, subprocess
 import math
+from transform import make_document
+import joblib
 
 def weight(dis, var):
     t = (-1)*(dis**2)/(2*var)
     return math.exp(t)
 
-l = range(2,66)
-y_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = [0])
-x_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = l)
-x_normalized = preprocessing.normalize(x_df, norm='l2')
-y_df = np.array(y_df[0])
-log_reg = LogisticRegression(solver = 'saga', max_iter = 500, C = 100.0)
-log_reg.fit(x_df, y_df)
+try:
+    log_reg = joblib.load('trainnede.pkl')
+except:
+    l = range(2,66)
+    y_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = [0])
+    x_df = pd.read_csv('information.csv', delimiter = ',', header = None, usecols = l)
+    x_normalized = preprocessing.normalize(x_df, norm='l2')
+    y_df = np.array(y_df[0])
+    log_reg = LogisticRegression(solver = 'saga', max_iter = 500, C = 100.0)
+    log_reg.fit(x_df, y_df)
+    joblib.dump(log_reg, 'trainnede.pkl')
 
 inputDir = "ImageData"
 
@@ -33,6 +39,7 @@ for file in os.listdir(inputDir):
         img_path = inputDir + '/' + file
         img1 = cv2.imread(img_path,1)
         org_img = img1.copy()
+        org = img1.copy()
         img1 = cv2.medianBlur(img1,29)
         kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         img1 = cv2.filter2D(img1, -1, kernel)
@@ -130,6 +137,10 @@ for file in os.listdir(inputDir):
         cv2.drawKeypoints(org_img, key_points_ne, out_img, (255,0,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
         cv2.drawContours(out_img, hull, 0, (255,255,0), 1)
         cv2.drawContours(out_img, [box], 0, (0,0,255),8)
+
+        warped = make_document(org, [box], 100 / scale_percent)
+
+        cv2.imshow("final", warped)
         cv2.imshow("window", out_img)
         # cv2.imshow("Homography", h_image)
         cv2.waitKey(10000)
