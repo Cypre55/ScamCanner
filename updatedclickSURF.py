@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 import os
 import csv
+import matplotlib.path as mpltPath
 
+polygons=[]
 refPt = []
-cropping = False
-topN = 100
+topN = 2000
 inputDir="ImageData"
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -23,15 +24,17 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     return resized
 
 def click_and_crop(event, x, y, flags, param):
-	global refPt, cropping
+	global refPt, polygons
 	if event == cv2.EVENT_LBUTTONDOWN:
 		refPt.append((x, y))
-		cropping = True
-	elif event == cv2.EVENT_LBUTTONUP:
-		refPt.append((x, y))
-		cropping = False
-		cv2.rectangle(ikps, refPt[-2], refPt[-1], (0, 255, 0), 2)
-		cv2.imshow("image", ikps)
+	elif event==cv2.EVENT_RBUTTONDOWN:
+		refPt.append((x,y))
+		polygons.append(refPt)
+		for i in range(0,len(refPt)):
+		    cv2.line(ikps,refPt[i],refPt[(i+1)%len(refPt)],(0,255,0),2)
+		    cv2.imshow("image", ikps)
+		refPt=[]
+		
 
 surf = cv2.xfeatures2d.SURF_create(75)
 with open('Data4Training.csv', 'w') as f:
@@ -41,6 +44,7 @@ with open('Data4Training.csv', 'w') as f:
 			continue
 		print("{} is loaded.".format(file))
 		refPt=[]
+		polygons=[]
 		img_path = './' + inputDir + '/' + file
 		image=cv2.imread(img_path)
 		if(image.shape[0] > image.shape[1]):
@@ -58,7 +62,6 @@ with open('Data4Training.csv', 'w') as f:
 		cl1 = clahe.apply(sharp)
 		kps, descs = surf.detectAndCompute(cl1, None)
 		ikps=np.empty((image.shape[0],image.shape[1],3),dtype=np.uint8)
-		img=image.copy()
 		cv2.drawKeypoints(image,kps,ikps,color=(0,102,255))
 		clone=ikps.copy()
 		cv2.namedWindow("image")
@@ -69,38 +72,38 @@ with open('Data4Training.csv', 'w') as f:
 			if key == ord("r"):
 				ikps= clone.copy()
 				refPt = []
+				polygons=[]
 			elif key == ord("c"):
 				break
 		
 		data=[]
-		print(len(refPt))
+		print(len(polygons))
+		cnt=0
 		for j in range(len(kps)):
 			temp=[]
 			b=False
-			for i in range(0,len(refPt),2):
-				y1=min(refPt[i][1],refPt[i+1][1])
-				y2=max(refPt[i][1],refPt[i+1][1])
-				x1=min(refPt[i][0],refPt[i+1][0])
-				x2=max(refPt[i][0],refPt[i+1][0])
-				x=kps[j].pt[0]
-				y=kps[j].pt[1]
-				if x>x1 and x<x2 and y>y1 and y<y2:
+			point=(kps[j].pt[0],kps[j].pt[1])
+			for polygon in polygons:
+				path=mpltPath.Path(polygon)
+				if path.contains_point(point):
 					b=True
 					break
 			if b:
+				cnt+=1
 				temp.append(1)
 				temp.append(kps[j])
 				for k in range(64):
 					temp.append(descs[j][k])
 				data.append(temp)
-				cv2.drawKeypoints(img,[kps[j]],img,color=(0,102,255))
+				cv2.drawKeypoints(image,[kps[j]],image,color=(0,102,255))
 			elif(j < topN):
 				temp.append(0)
 				temp.append(kps[j])
 				for k in range(64):
 					temp.append(descs[j][k])
 				data.append(temp)
-		cv2.imshow('corners',img)
+		print(cnt)
+		cv2.imshow('selected points',image)
 		cv2.waitKey(0)
 		cv2.destroyAllWindows()
 		writer.writerows(data)
