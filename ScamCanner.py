@@ -3,12 +3,10 @@ import cv2
 import numpy as np
 import os
 from transform import make_document
-from sklearn import svm
 import matplotlib.pyplot as plt
 import math
 import scipy.ndimage.filters as filters
 import scipy.ndimage as ndimage
-from skimage.transform import hough_line_peaks
 
 def findy(r,t,x):
     return(int((r-x*math.cos(t))/math.sin(t)))
@@ -26,39 +24,6 @@ def intersection(r,t,r1,t1):
         y=(-r*math.cos(t1)+r1*math.cos(t))/det
         return int(x),int(y)
 
-def HoughLines(edges,x_max,y_max,min_dist=5,min_angle=0,threshold=0.3,num_peaks=50):
-    theta_max = 1.0 * math.pi
-    theta_min = -1.0 * math.pi / 2.0
-    r_min = 0.0
-    r_max = math.hypot(x_max, y_max)
-    r_dim = 200
-    theta_dim = 300
-    hough_space = np.zeros((r_dim,theta_dim))
-    for edge in edges:
-        for itheta in range(theta_dim):
-            x,y=edge.pt
-            theta = 1.0 * itheta * (theta_max - theta_min) / theta_dim + theta_min
-            r = x * math.cos(theta) + y * math.sin(theta)
-            ir = r_dim * ( 1.0 * r ) / r_max
-            hough_space[round(ir),round(itheta)] = hough_space[round(ir),round(itheta)] + 1
-
-    angles=np.arange(0,theta_dim)
-    dists=np.arange(0,r_dim)
-    print(min_dist)
-    hspace,angles,dists=hough_line_peaks(hough_space,angles,dists,min_dist,min_angle,threshold*np.amax(hough_space),num_peaks)
-    
-    plt.imshow(hough_space,origin='lower')
-    plt.plot(angles,dists, 'ro')
-    plt.savefig('hough_space_maximas.png', bbox_inches = 'tight')
-    plt.close()
-    
-    r=[]
-    theta=[]
-    for i,j in zip(dists,angles):
-        r.append((1.0 * i * r_max ) / r_dim)
-        theta.append(1.0 * j * (theta_max - theta_min) / theta_dim + theta_min)
-    return r,theta
-
 def dist(pt1,pt2):
     return math.sqrt((pt1[0]-pt2[0])**2+(pt1[1]-pt2[1])**2)
 
@@ -75,6 +40,74 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
         dim = (width, int(h * r))
     resized = cv2.resize(image, dim, interpolation = inter)
     return resized,1/r
+
+def HoughLines(edges,x_max,y_max):
+    theta_max = 1.0 * math.pi
+    theta_min = -1.0 * math.pi / 2.0
+    r_min = 0.0
+    r_max = math.hypot(x_max, y_max)
+    r_dim = 200
+    theta_dim = 300
+    hough_space = np.zeros((r_dim,theta_dim))
+    for edge in edges:
+        for itheta in range(theta_dim):
+            x,y=edge.pt
+            theta = 1.0 * itheta * (theta_max - theta_min) / theta_dim + theta_min
+            r = x * math.cos(theta) + y * math.sin(theta)
+            ir = round(r_dim * ( 1.0 * r ) / r_max)
+            if ir>=0 and ir<r_dim:
+                hough_space[ir,itheta] = hough_space[ir,itheta] + 1
+
+    neighborhood_size = 20
+    threshold = 20
+
+    data_max = filters.maximum_filter(hough_space, neighborhood_size)
+    maxima = (hough_space == data_max)
+    data_min = filters.minimum_filter(hough_space, neighborhood_size)
+    diff = ((data_max - data_min) > threshold)
+    maxima[diff == 0] = 0
+
+    labeled, num_objects = ndimage.label(maxima)
+    slices = ndimage.find_objects(labeled)
+
+    temp=[]
+    for dy,dx in slices:
+        x_center = (dx.start + dx.stop - 1)/2
+        y_center = (dy.start + dy.stop - 1)/2
+        temp.append((hough_space[int(y_center)][int(x_center)],x_center,y_center))
+
+    temp=sorted(temp,reverse=True)
+    #print(len(temp),temp)
+    x,y=[],[]
+    r=[]
+    theta=[]
+    for _,i,j in temp:
+        b=True
+        c=True
+        for x1,y1 in zip(x,y):
+            if dist((x1,y1),(i,j))<10:#checking for close lying hough peaks
+                b=False
+                break
+            if y1<10 and j<10 and (abs(x1-i)<10 or abs(x1-i) in range(190,210)):
+                c=False
+                break
+
+        if b and c:
+            x.append(i)
+            y.append(j)
+            r.append((1.0 * j * r_max ) / r_dim)
+            theta.append(1.0 * i * (theta_max - theta_min) / theta_dim + theta_min)
+
+    plt.imshow(hough_space, origin='lower')
+    plt.plot(x,y, 'ro')
+    cnt=1
+    for i,j in zip(x,y):
+        plt.text(i+1,j+1,str(cnt))
+        cnt+=1
+    plt.savefig('hough_space_maximas.png', bbox_inches = 'tight')
+    plt.close()
+
+    return r,theta
 
 inputDir='TEST'
 lr=logr()
@@ -130,87 +163,81 @@ for file in os.listdir(inputDir):
             left.append(edges[i])
     edges=left
 
-    x_max = image.shape[1]
-    y_max = image.shape[0]
-    d,theta = HoughLines(edges,x_max,y_max)#,min_dist=0)#,min_angle=0,threshold=0,num_peaks=20)
-    print(len(d))
-    corners=[]
-    for r,t in zip(d,theta):
-        for r1,t1 in zip(d,theta):
-            if r==r1 and t==t1:
-                continue
-            pt=intersection(r,t,r1,t1)
-            if pt!=None and pt[0]>=0 and pt[0]<x_max and pt[1]>=0 and pt[1]<y_max:
-                corners.append(pt)
-    cont=[]
-    for i in range(len(corners)):
-        temp=[]
-        temp.append(corners[i][0])
-        temp.append(corners[i][1])
-        temp=np.asarray(temp)
-        temp1=[]
-        temp1.append(temp)
-        temp1=np.asarray(temp1)
-        cont.append(temp)
-    cont=np.asarray(cont)
-
-    hull=[]
+    out_img = np.copy(image)
+    cv2.drawKeypoints(image, edges, out_img, (0,0,255), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
+    cv2.drawKeypoints(image, nedges, out_img, (255,0,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
+    cv2.drawKeypoints(image, rem, out_img, (0,255,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
 
     try:
-        hull.append(cv2.convexHull(cont,False))
-        out_img = np.copy(image)
-        cv2.drawKeypoints(image, edges, out_img, (0,0,255), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
-        cv2.drawKeypoints(image, nedges, out_img, (255,0,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
-        cv2.drawKeypoints(image, rem, out_img, (0,255,0), flags = cv2.DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG)
-        cv2.drawContours(out_img, hull, 0, (255,255,0),1)
-        
+        x_max = image.shape[1]
+        y_max = image.shape[0]
+        d,theta = HoughLines(edges,x_max,y_max)#,min_dist=0)#,min_angle=0,threshold=0,num_peaks=20)
+        #print(len(d))
+        #print(d,theta)
         cnt=1
         for r,t in zip(d,theta):
-            x=[]
-            y=[]
             s=math.sin(t)
             c=math.cos(t)
-            if s<0.01 and s>-0.01:
-                x.append(int(r/c))
-                x.append(int(r/c))
-                y.append(0)
-                y.append(y_max-1)
-            elif c<0.01 and c>-0.01:
-                x.append(0)
-                x.append(x_max-1)
-                y.append(int(r/s))
-                y.append(int(r/s))
-            else:
-                for x1 in (0,x_max-1):
-                    y1=findy(r,t,x1)
-                    if y1>=0 and y1<y_max:
-                        x.append(x1)
-                        y.append(y1)
-                for y1 in (0,y_max-1):
-                    if y1 in y:
-                        continue
-                    x1=findx(r,t,y1)
-                    if x1>=0 and x1<x_max:
-                        x.append(x1)
-                        y.append(y1)
-            #print(x,y,x_max,y_max)
-            #if len(x)<2:
-                #print("#####",r,t)
-            if len(x)==2:
-                cv2.line(out_img,(x[0],y[0]),(x[1],y[1]),(0,255,255),2)
-                a,b=int(x[0]/2+x[1]/2),int(y[0]/2+y[1]/2)
-                cv2.putText(out_img,str(cnt),(a,b),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,102),2)
-                cnt+=1
+            x=r*c
+            y=r*s
+            x1=x+10000*s
+            y1=y-10000*c
+            x2=x-10000*s
+            y2=y+10000*c
+            color=(0,255,255)
+            if cnt<=4:
+                color=(0,102,255)
+            cv2.line(out_img,(int(x1),int(y1)),(int(x2),int(y2)),color,2)
+            cnt+=1
 
-        '''warped = make_document(org, hull, ratio)
+        if len(d)<4:
+            raise Exception("ONE OF THE EDGES IS MISSING OR NOT CLEAR!!")
+
+        corners=[]
+        d1=d[:4]
+        theta1=theta[:4]
+        for r,t in zip(d1,theta1):
+            for r1,t1 in zip(d1,theta1):
+                if r==r1 and t==t1:
+                    continue
+                pt=intersection(r,t,r1,t1)
+                if pt!=None and pt[0]>=0 and pt[0]<x_max and pt[1]>=0 and pt[1]<y_max:
+                    corners.append(pt)
+
+        if len(corners)<4:
+            raise Exception("THE CORNER IS OUT OF THE PICTURE")
+
+        cont=[]
+        for i in range(len(corners)):
+            temp=[]
+            temp.append(corners[i][0])
+            temp.append(corners[i][1])
+            temp=np.asarray(temp)
+            temp1=[]
+            temp1.append(temp)
+            temp1=np.asarray(temp1)
+            cont.append(temp)
+        cont=np.asarray(cont)
+
+        #hull=[]
+
+        #hull.append(cv2.convexHull(cont,False))
+        #cv2.drawContours(out_img, hull, 0, (255,255,0),1)
+        
+        warped = make_document(org, [cont], ratio)
         if(warped.shape[0] > warped.shape[1]):
                 warp,_ = image_resize(warped, height=1000)
         else:
                 warp,_ = image_resize(warped, width=1000)
-        cv2.imshow("doc", warp)'''
-        cv2.imshow("window", out_img)
-        cv2.waitKey(0)
+        cv2.imshow("doc", warp)
+        #cv2.imshow("window", out_img)
+        key=cv2.waitKey(0)
+        if key==ord("d"):
+            raise Exception("ERROR")
+        cv2.destroyAllWindows()
+        #os.remove(img_path)
     except Exception as e:
         print(e)
-    
-    cv2.destroyAllWindows()
+        cv2.imshow("ERROR",out_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
