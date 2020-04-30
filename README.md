@@ -31,6 +31,7 @@ seaborn==0.10.0
 six==1.14.0
 typed-ast==1.4.1
 wrapt==1.11.2
-##Documentation
+## Documentation
 To edit: https://www.overleaf.com/7426916241btpgnswcdnyq
+
 To view: https://www.overleaf.com/read/hgcchzmywxtm
