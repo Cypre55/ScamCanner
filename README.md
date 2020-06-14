@@ -4,6 +4,7 @@ To run the ScamCanner make a local directory called "ImageData" and add the imag
 
 ## Made by
 Agni Purani, Neha Dalmia, Rishab Agarwal, Rohit Raj, Rohit Sutradhar, Satwik Chappidi
+
 Helped by: Archit Rungta, Balaji Udayagiri, Debjoy Saha, Raja Raghav, Yash Soni
 
 ## Modules required in python3
