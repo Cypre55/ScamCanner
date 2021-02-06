@@ -109,7 +109,7 @@ def HoughLines(edges,x_max,y_max):
 
     return r,theta
 
-inputDir='TEST'
+inputDir='Image Data'
 lr=logr()
 surf = cv2.xfeatures2d.SURF_create(75)
 
