@@ -10,21 +10,21 @@ For a more detailed understanding, please check out [the document](./ScamCanner.
 
 Following are some images illustrating some the processes taking place.
 
+---> Applying various filters to remove text from an image.
+
 ![](./Images/pic1.png)
 
-Applying various filters to remove text from an image.
+---> Classifying Feature Points obtained from SURF as edge using a pre-trained classification model.
 
 ![](./Images/pic2.png)
 
-Classifying Feature Points obtained from SURF as edge using a pre-trained classification model.
+---> Fitting lines through feature points classified as edges to get the bounding box
 
 ![](./Images/pic3.png)
 
-Fitting lines through feature points classified as edges to get the bounding box
+----> Final output after performing homography and thresholding.
 
 <img src="./Images/pic4.png" style="zoom:67%;" />
-
-Final output after performing homography and thresholding.
 
 ## Made by
 
